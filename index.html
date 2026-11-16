@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Корзины для автоклава ПетКорм</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Лист заводского чертежа: слева 3D, справа спецификация как в штампе; сталь и синий технический акцент */
+:root {
+  --bg: #eef0f2; --panel: #ffffff; --fg: #1b2026; --dim: #5c6670; --line: #cfd5db; --accent: #1f5fa8; --warn: #a8661f;
+  --steel: #b9c1c9; --grill: #8b949c; --scene: #e4e8ec;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; --mono: "IBM Plex Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #14181c; --panel: #1c2127; --fg: #e3e7eb; --dim: #94a0ab; --line: #2e353d; --accent: #6aa5e8; --warn: #e0a35c; --steel: #c8d0d8; --grill: #6b747c; --scene: #1a1f24; color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #14181c; --panel: #1c2127; --fg: #e3e7eb; --dim: #94a0ab; --line: #2e353d; --accent: #6aa5e8; --warn: #e0a35c; --steel: #c8d0d8; --grill: #6b747c; --scene: #1a1f24; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 20px 40px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 16px; }
+header h1 { font-size: 26px; font-weight: 600; margin: 0; text-wrap: balance; }
+header p { margin: 4px 0 0; color: var(--dim); max-width: 70ch; }
+.main { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
+@media (max-width: 860px) { .main { grid-template-columns: minmax(0, 1fr); } }
+.view { background: var(--scene); border: 1px solid var(--line); border-radius: 6px; position: relative; aspect-ratio: 4 / 3; max-width: 100%; overflow: hidden; }
+.view canvas { width: 100% !important; height: 100% !important; display: block; }
+.tools { position: absolute; left: 10px; top: 10px; display: flex; gap: 6px; flex-wrap: wrap; }
+.tools button { font: 500 13px var(--sans); padding: 6px 10px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); border-radius: 4px; cursor: pointer; }
+.tools button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.tools button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.hint { position: absolute; right: 10px; bottom: 8px; font: 12px var(--mono); color: var(--dim); }
+aside { display: grid; gap: 16px; min-width: 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; min-width: 0; }
+.card h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); margin: 0 0 8px; font-weight: 600; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+td { padding: 5px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.v { text-align: right; font-family: var(--mono); white-space: nowrap; padding-left: 10px; }
+tr:last-child td { border-bottom: 0; }
+.total td { font-weight: 600; }
+ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.open li::marker { color: var(--warn); }
+.files { font-family: var(--mono); font-size: 13px; word-break: break-all; }
+</style>
+
+</head>
+<body style="margin:0">
+<div class="wrap">
+  <header>
+    <h1>Корзины для отбраковки паучей</h1>
+    <p>4 сетчатые корзины с крышкой на верхнюю решётку автоклава 790 × 790 мм. Корпус 350 × 350 × 100 мм на ножках: дно поднято на 25 мм, чтобы корзина не давила на паучи, лежащие на решётке. AISI 304, все края закрыты прутком — без заусенцев.</p>
+  </header>
+  <div class="main">
+    <div class="view" id="view">
+      <div class="tools">
+        <button id="b-one" aria-pressed="true">Одна корзина</button>
+        <button id="b-four" aria-pressed="false">4 на решётке</button>
+        <button id="b-lid" aria-pressed="false">Открыть крышку</button>
+      </div>
+      <div class="hint">мышь — вращать, колесо — масштаб</div>
+    </div>
+    <aside>
+      <div class="card"><h2>Конструкция</h2><table id="spec"></table></div>
+      <div class="card"><h2>Металл на одну корзину</h2><table id="bom"></table></div>
+      <div class="card open"><h2>Подтвердить до изготовления</h2>
+        <ul>
+          <li>Крышка на двух петлях сзади и с крючком-защёлкой спереди. Так подходит, или нужна съёмная?</li>
+          <li>Под корзиной 25 мм. Хватит ли этого над паучами на решётке (Гаас просил «пару см»)?</li>
+          <li>35 × 35 × 10 см считаю корпусом, с ножками и крышкой выходит около 135 мм. Хватит ли высоты до свода автоклава?</li>
+          <li>Сетка: проволока Ø2,5 с ячейкой 20 мм подойдёт, или брак мелкий и нужна ячейка мельче?</li>
+          <li>Ручки сделаны окнами в двух стенках, как на эскизе. Наружные скобы не помещаются: соседние корзины упрутся.</li>
+                  </ul>
+      </div>
+      <div class="card"><h2>Файлы</h2><div class="files">корзина_350x350x100.stl<br>корзины_4шт_на_решётке.stl</div></div>
+    </aside>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+// Корзина для брака паучей в автоклав ПетКорм (4 шт. на решётку 790×790).
+// Геометрия одна на STL (node) и на 3D-просмотрщик (браузер). Мм, Z вверх, начало — центр под ножками.
+// Каждый элемент — пруток: {a:[x,y,z], b:[x,y,z], r, part}
+(function (root) {
+  const P = {
+    L: 350, W: 350, H: 125,      // 350×350 по корпусу, корпус 100 (ТЗ 35×35×10 см) + ножки; H — до верха обода
+    foot: 25,                    // ножки: дно на 25 мм над решёткой — не давит на паучи под корзиной (Гаас: «приподнять на пару см»)
+    rimD: 8,                     // верхний обод — пруток Ø8 (кромка без заусенцев, держит форму)
+    frameD: 6,                   // нижняя рамка, угловые стойки, ручки, ножки — пруток Ø6
+    wireD: 2.5,                  // сетка — проволока Ø2,5
+    cell: 20,                    // ячейка сетки 20×20
+    handleW: 110, handleH: 35, handleGap: 12, // окна-ручки в двух стенках: ширина, высота, отступ от обода
+    footInset: 35, footW: 30,    // ножки у углов
+    grill: 790,                  // решётка автоклава 790×790
+    hingeX: 110, latchW: 40,     // крышка: петли-кольца на оси ±110 по задней кромке, защёлка-крючок спереди
+  };
+
+  function spread(a, b, step) { // узлы сетки с шагом ~step между a и b (без краёв)
+    const n = Math.max(1, Math.round((b - a) / step)); const out = [];
+    for (let i = 1; i < n; i++) out.push(a + ((b - a) * i) / n);
+    return out;
+  }
+
+  function build(p = P, opt = {}) {
+    const lidAngle = opt.lidAngle || 0; // 0 — закрыта, градусы — открыта на петлях
+    const S = [], hx = p.L / 2, hy = p.W / 2;
+    const rr = p.rimD / 2, fr = p.frameD / 2, wr = p.wireD / 2;
+    const zTop = p.H - rr, zBot = p.foot + fr;
+    const rod = (a, b, r, part) => S.push({ a, b, r, part });
+    const rect = (z, ix, iy, r, part) => {
+      rod([-ix, -iy, z], [ix, -iy, z], r, part); rod([ix, -iy, z], [ix, iy, z], r, part);
+      rod([ix, iy, z], [-ix, iy, z], r, part); rod([-ix, iy, z], [-ix, -iy, z], r, part);
+    };
+    // каркас: обод, нижняя рамка, 4 стойки (оси прутков на габарите минус радиус)
+    const ox = hx - rr, oy = hy - rr, bx = hx - fr, by = hy - fr;
+    rect(zTop, ox, oy, rr, "обод Ø" + p.rimD);
+    rect(zBot, bx, by, fr, "рамка Ø" + p.frameD);
+    for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) rod([sx * bx, sy * by, zBot], [sx * bx, sy * by, zTop], fr, "стойки Ø" + p.frameD);
+    // сетка: дно (проволока лежит на рамке изнутри) и 4 стенки (с внутренней стороны каркаса)
+    const zMesh = zBot + fr + wr, wx = bx - fr - wr, wy = by - fr - wr, m = "сетка Ø" + p.wireD;
+    for (const y of spread(-wy, wy, p.cell)) rod([-wx, y, zMesh], [wx, y, zMesh], wr, m);
+    for (const x of spread(-wx, wx, p.cell)) rod([x, -wy, zMesh - 2 * wr], [x, wy, zMesh - 2 * wr], wr, m);
+    // окно-ручка в стенках ±X (как на эскизе): проём handleW × handleH под ободом, обрамлён прутком Ø6
+    const hw = p.handleW / 2, zw1 = zTop - rr - p.handleGap, zw0 = zw1 - p.handleH;
+    const inWin = (y, z) => Math.abs(y) < hw + fr && z > zw0 - fr && z < zw1 + fr;
+    const zs = spread(zBot, zTop, p.cell);
+    for (const s of [-1, 1]) {
+      for (const z of zs) {
+        rod([-wx, s * wy, z], [wx, s * wy, z], wr, m);
+        if (z > zw0 - fr && z < zw1 + fr) { rod([s * wx, -wy, z], [s * wx, -hw - fr, z], wr, m); rod([s * wx, hw + fr, z], [s * wx, wy, z], wr, m); }
+        else rod([s * wx, -wy, z], [s * wx, wy, z], wr, m);
+      }
+      for (const x of spread(-wx, wx, p.cell)) rod([x, s * (wy - 2 * wr), zBot], [x, s * (wy - 2 * wr), zTop], wr, m);
+      for (const y of spread(-wy, wy, p.cell)) {
+        const X = s * (wx - 2 * wr);
+        if (Math.abs(y) < hw + fr) { rod([X, y, zBot], [X, y, zw0 - fr], wr, m); rod([X, y, zw1 + fr], [X, y, zTop], wr, m); }
+        else rod([X, y, zBot], [X, y, zTop], wr, m);
+      }
+      const h = "ручки Ø" + p.frameD, x = s * bx;
+      rod([x, -hw, zw0], [x, hw, zw0], fr, h); rod([x, hw, zw0], [x, hw, zw1], fr, h);
+      rod([x, hw, zw1], [x, -hw, zw1], fr, h); rod([x, -hw, zw1], [x, -hw, zw0], fr, h);
+    }
+    // ножки-петли у углов: П-образная скоба вниз от рамки
+    for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+      const x = sx * (bx - p.footInset), ya = sy * (by - p.footInset), yb = sy * (by - p.footInset - p.footW), f = "ножки Ø" + p.frameD;
+      rod([x, ya, zBot], [x, ya, fr], fr, f); rod([x, ya, fr], [x, yb, fr], fr, f); rod([x, yb, fr], [x, yb, zBot], fr, f);
+    }
+    // крышка: рамка Ø6 по габариту обода, лежит на нём; сетка как у дна; петли-кольца сзади (−Y), крючок-защёлка спереди (+Y)
+    const zl = zTop + rr + fr, lx = hx - fr, ly = hy - fr, L = [];
+    const lrod = (a, b, r, part) => L.push({ a, b, r, part });
+    const lf = "крышка: рамка Ø" + p.frameD, lm = "крышка: сетка Ø" + p.wireD;
+    lrod([-lx, -ly, zl], [lx, -ly, zl], fr, lf); lrod([lx, -ly, zl], [lx, ly, zl], fr, lf); lrod([lx, ly, zl], [-lx, ly, zl], fr, lf); lrod([-lx, ly, zl], [-lx, -ly, zl], fr, lf);
+    const lmx = lx - fr - wr, lmy = ly - fr - wr;
+    for (const y of spread(-lmy, lmy, p.cell)) lrod([-lmx, y, zl - fr + wr], [lmx, y, zl - fr + wr], wr, lm);
+    for (const x of spread(-lmx, lmx, p.cell)) lrod([x, -lmy, zl - fr + 3 * wr], [x, lmy, zl - fr + 3 * wr], wr, lm);
+    // защёлка: П-крючок с передней кромки крышки за обод
+    const lw = p.latchW / 2, hz = zTop - rr - 10, hk = "крышка: защёлка Ø4", kr = 2;
+    lrod([-lw, ly, zl], [-lw, hy + kr + 1, zl], kr, hk); lrod([-lw, hy + kr + 1, zl], [-lw, hy + kr + 1, hz], kr, hk);
+    lrod([-lw, hy + kr + 1, hz], [lw, hy + kr + 1, hz], kr, hk); lrod([lw, hy + kr + 1, hz], [lw, hy + kr + 1, zl], kr, hk); lrod([lw, hy + kr + 1, zl], [lw, ly, zl], kr, hk);
+    // поворот крышки вокруг оси петель (ось X на задней кромке обода)
+    const ay = -oy, az = zTop, q = (-lidAngle * Math.PI) / 180, c = Math.cos(q), sn = Math.sin(q);
+    const rot = (v) => [v[0], ay + (v[1] - ay) * c - (v[2] - az) * sn, az + (v[1] - ay) * sn + (v[2] - az) * c];
+    for (const e of L) S.push({ a: rot(e.a), b: rot(e.b), r: e.r, part: e.part });
+    // петли-кольца вокруг заднего обода (неподвижны, крышка проворачивается в них): квадратное кольцо из Ø4
+    for (const s of [-1, 1]) {
+      const x = s * p.hingeX, o = rr + 3, h = "петли Ø4";
+      for (const [d0, d1] of [[[0, -o, -o], [0, o, -o]], [[0, o, -o], [0, o, o]], [[0, o, o], [0, -o, o]], [[0, -o, o], [0, -o, -o]]])
+        S.push({ a: [x + d0[0], -oy + d0[1], zTop + d0[2]], b: [x + d1[0], -oy + d1[1], zTop + d1[2]], r: 2, part: h });
+    }
+    return S;
+  }
+
+  // масса AISI 304 (7,93 г/см³) и метраж по деталям
+  function bom(S) {
+    const by = {};
+    for (const e of S) {
+      const len = Math.hypot(e.b[0] - e.a[0], e.b[1] - e.a[1], e.b[2] - e.a[2]);
+      const k = (by[e.part] = by[e.part] || { len: 0, kg: 0 });
+      k.len += len; k.kg += (Math.PI * e.r * e.r * len * 7.93) / 1e6;
+    }
+    let kg = 0; for (const k in by) kg += by[k].kg;
+    return { parts: by, kg };
+  }
+
+  const api = { P, build, bom };
+  if (typeof module !== "undefined") module.exports = api; else root.BasketGeo = api;
+})(this);
+
+</script>
+<script>
+(function () {
+  const G = window.BasketGeo, P = G.P; let rods = G.build(P); const bom = G.bom(rods); let lidOpen = false;
+  const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  // спецификация
+  const spec = [["Габарит", `${P.L} × ${P.W} × ${P.H} мм`], ["Материал", "AISI 304"], ["Обод", `пруток Ø${P.rimD}`], ["Рамка, стойки, ручки, ножки", `пруток Ø${P.frameD}`], ["Сетка", `Ø${P.wireD}, ячейка ${P.cell} мм`], ["Окна-ручки", `${P.handleW} × ${P.handleH} мм, 2 шт.`], ["Ножки-петли", `4 шт., дно на ${P.foot} мм над решёткой`], ["Крышка", "сетка на рамке Ø6, 2 петли, защёлка"], ["Высота с крышкой", `≈ ${Math.round(P.H + P.frameD + 4)} мм`], ["Зазор между корзинами", `${P.grill / 2 - P.L} мм`]];
+  document.getElementById("spec").innerHTML = spec.map(([k, v]) => `<tr><td>${k}</td><td class="v">${v}</td></tr>`).join("");
+  document.getElementById("bom").innerHTML = Object.entries(bom.parts).map(([k, v]) => `<tr><td>${k}</td><td class="v">${(v.len / 1000).toFixed(2)} м</td><td class="v">${v.kg.toFixed(2)} кг</td></tr>`).join("") + `<tr class="total"><td>Масса одной</td><td></td><td class="v">≈ ${bom.kg.toFixed(2)} кг</td></tr><tr class="total"><td>4 корзины</td><td></td><td class="v">≈ ${(bom.kg * 4).toFixed(1)} кг</td></tr>`;
+
+  const box = document.getElementById("view");
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+  box.appendChild(renderer.domElement);
+  const scene = new THREE.Scene();
+  const cam = new THREE.PerspectiveCamera(35, 4 / 3, 5, 20000);
+  const ctl = new THREE.OrbitControls(cam, renderer.domElement); ctl.enableDamping = true;
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x445566, 0.85));
+  const sun = new THREE.DirectionalLight(0xffffff, 0.7); sun.position.set(600, -400, 900); scene.add(sun);
+  const steel = new THREE.MeshStandardMaterial({ color: css("--steel"), metalness: 0.55, roughness: 0.35 });
+  const grillMat = new THREE.MeshStandardMaterial({ color: css("--grill"), metalness: 0.4, roughness: 0.6 });
+  const up = new THREE.Vector3(0, 1, 0);
+  function basket() {
+    const g = new THREE.Group(); const cache = {};
+    for (const e of rods) {
+      const a = new THREE.Vector3(...e.a), b = new THREE.Vector3(...e.b), d = b.clone().sub(a), L = d.length() + 2 * e.r;
+      const key = e.r + ":" + Math.round(L); const geo = cache[key] || (cache[key] = new THREE.CylinderGeometry(e.r, e.r, L, e.r > 2 ? 10 : 6));
+      const m = new THREE.Mesh(geo, steel); m.position.copy(a.add(b).multiplyScalar(0.5)); m.quaternion.setFromUnitVectors(up, d.normalize()); g.add(m);
+    }
+    return g;
+  }
+  const root = new THREE.Group(); root.rotation.x = -Math.PI / 2; scene.add(root);
+  let one = basket();
+  const four = new THREE.Group(), baskets4 = new THREE.Group(); four.add(baskets4); const c = P.grill / 4;
+  function fill4() { baskets4.clear(); for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) { const b = one.clone(); b.position.set(sx * c, sy * c, 0); baskets4.add(b); } }
+  fill4();
+  // решётка автоклава: рамка + прутки с шагом ~12 мм (как на фото), лежит под корзинами
+  const grill = new THREE.Group(), gh = P.grill / 2;
+  const bar = (x, y, w, h, t) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, t), grillMat); m.position.set(x, y, -t / 2); grill.add(m); };
+  bar(0, -gh, P.grill, 20, 12); bar(0, gh, P.grill, 20, 12); bar(-gh, 0, 20, P.grill, 12); bar(gh, 0, 20, P.grill, 12);
+  for (let x = -gh + 12; x < gh; x += 12) bar(x, 0, 2, P.grill, 6);
+  four.add(grill);
+  root.add(one); root.add(four); four.visible = false;
+
+  function frame(isFour) {
+    one.visible = !isFour; four.visible = isFour;
+    const R = isFour ? 1300 : 650; cam.position.set(R * 0.8, R * 0.75, R * 0.9); ctl.target.set(0, isFour ? 0 : 65, 0); ctl.update();
+    document.getElementById("b-one").setAttribute("aria-pressed", String(!isFour));
+    document.getElementById("b-four").setAttribute("aria-pressed", String(isFour));
+  }
+  document.getElementById("b-one").onclick = () => frame(false);
+  document.getElementById("b-four").onclick = () => frame(true);
+  document.getElementById("b-lid").onclick = () => {
+    lidOpen = !lidOpen; rods = G.build(P, { lidAngle: lidOpen ? 105 : 0 });
+    const vis = one.visible; root.remove(one); one = basket(); one.visible = vis; root.add(one); fill4();
+    const b = document.getElementById("b-lid"); b.textContent = lidOpen ? "Закрыть крышку" : "Открыть крышку"; b.setAttribute("aria-pressed", String(lidOpen));
+  };
+  frame(false);
+  function size() { const w = box.clientWidth, h = box.clientHeight; renderer.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); }
+  new ResizeObserver(size).observe(box); size();
+  (function loop() { ctl.update(); renderer.render(scene, cam); requestAnimationFrame(loop); })();
+})();
+</script>
+</body>
+</html>
